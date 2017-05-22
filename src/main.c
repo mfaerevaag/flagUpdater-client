@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     /* get prompt */
     bzero(buf, MAX_BUF);
     sock_read(fd, buf, MAX_BUF);
-    log_infof("got: %s", buf);
+    /* log_infof("got: %s", buf); */
 
     /* send username */
     sprintf(buf, "%s\n", username);
@@ -57,7 +57,8 @@ int main(int argc, char *argv[])
     /* read challenge */
     bzero(buf, MAX_BUF);
     sock_read_multiline(fd, buf, MAX_BUF, pattern);
-    log_infof("got: %s", buf);
+
+    log_infof("got challenge:\n%s", buf);
     cipher = strdup(buf);
 
     /* decrypt */
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    log_infof("got number:\n%s", plain);
+    log_infof("decrypted number: %s", plain);
 
     /* sign */
     ret = gpg_sign(plain, strlen(plain), &sign);
@@ -97,11 +98,11 @@ int main(int argc, char *argv[])
     /* send answer */
     sock_write(fd, cipher, strlen(cipher));
 
-    /* get final answer */
+    /* get authentication result */
     bzero(buf, MAX_BUF);
     sock_read(fd, buf, MAX_BUF);
 
-    log_infof("got final answer: %s", buf);
+    log_infof("got auth result: %s", buf);
 
     /* construct json */
     bzero(buf, MAX_BUF);
@@ -122,6 +123,12 @@ int main(int argc, char *argv[])
     sock_write(fd, cipher_json, strlen(cipher_json));
 
     log_infof("sending json:\n%s", buf);
+
+    /* get final answer */
+    bzero(buf, MAX_BUF);
+    sock_read(fd, buf, MAX_BUF);
+
+    log_infof("got: %s", buf);
 
     /* clean up */
     gpg_free();
