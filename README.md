@@ -23,7 +23,8 @@ The arguments are:
  1. `ip`: flag updater server
  2. `port`: flag updater server
  3. `srv.key`: path to server's public key
+ 4. `username`: github username of TA
  
 ### Example
 
-    build/client 127.0.0.1 41 ./srv.pub
+    build/client 127.0.0.1 41 ./srv.pub sangkilc
