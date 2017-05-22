@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
 {
     int ret, port, fd;
     char buf[MAX_BUF];
-    char *ip, *srv_keypath, *cli_username;
-    char *fpr, *cipher, *sign, *plain;
+    char *ip, *srv_keypath, *username, *newflag;
+    char *fpr, *cipher, *sign, *plain, *cipher_json;
 
     /* check args */
     if (argc < 5) {
@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
     port = atoi(argv[2]);
     srv_keypath = strdup(argv[3]);
     cli_username = strdup(argv[4]);
+    newflag = "SOMEFLAGBRUH";
 
     /* init */
     gpg_init(GPG_PRIV_KEY);
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
     log_infof("got: %s", buf);
 
     /* send username */
-    sprintf(buf, "%s\n", cli_username);
+    sprintf(buf, "%s\n", username);
     sock_write(fd, buf, strlen(buf));
 
     /* read challenge */
@@ -96,10 +97,31 @@ int main(int argc, char *argv[])
     /* send answer */
     sock_write(fd, cipher, strlen(cipher));
 
+    /* get final answer */
     bzero(buf, MAX_BUF);
     sock_read(fd, buf, MAX_BUF);
 
     log_infof("got final answer: %s", buf);
+
+    /* construct json */
+    bzero(buf, MAX_BUF);
+    sprintf(buf, "{"
+            "\"signer\": \"%s\","
+            "\"newflag\": \"%s\","
+            "\"signature\": \"%s:%s\""
+            "}\n", username, newflag, username, newflag);
+
+    /* encrypt json */
+    ret = gpg_encrypt(fpr, buf, strlen(buf), &cipher_json);
+    if (ret < 0) {
+        log_err("failed to encrypt json");
+        return -1;
+    }
+
+    /* send encrypted json */
+    sock_write(fd, cipher_json, strlen(cipher_json));
+
+    log_infof("sending json:\n%s", buf);
 
     /* clean up */
     gpg_free();
