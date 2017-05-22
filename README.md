@@ -27,4 +27,4 @@ The arguments are:
  
 ### Example
 
-    build/client 127.0.0.1 41 ./srv.pub sangkilc
+    build/client 127.0.0.1 42 ./srv.pub sangkilc
