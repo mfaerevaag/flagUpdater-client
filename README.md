@@ -5,7 +5,7 @@ Flag updater - Client
 
 ## Installation
 
-Run `make` then `build/client`.
+Run `make`.
 
 ### Dependencies
 
@@ -13,5 +13,17 @@ Requires C libraries (found in Aptitude, for instance):
  - `libgpgme`
 
 The client expects a gpg keypair with the following to be in project root:
- - `test_priv.key`
- - `test_pub.key`
+ - `priv.key`
+ - `pub.key`
+
+
+## Running
+
+The arguments are:
+ 1. `ip`: flag updater server
+ 2. `port`: flag updater server
+ 3. `srv.key`: path to server's public key
+ 
+### Example
+
+    build/client 127.0.0.1 41 ./srv.pub
