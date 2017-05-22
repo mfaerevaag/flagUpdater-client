@@ -10,7 +10,6 @@
 /* constants */
 #define GPG_PRIV_KEY "test_priv.key"
 #define GPG_PUB_KEY "test_pub.key"
-#define GPG_KEYS_DIR "../authorized_keys"
 
 char *pattern = "-----END PGP MESSAGE-----";
 
@@ -20,6 +19,8 @@ int main(int argc, char *argv[])
     char buf[MAX_BUF];
     char *fpr, *cipher, *sign, *plain;
 
+    char *ip = "127.0.0.1";
+    int port = 1337;
     char *srv_keypath = "../pub_key.asc";
     char *cli_username = "../t";
 
@@ -36,7 +37,7 @@ int main(int argc, char *argv[])
     log_infof("server key %s", fpr);
 
     /* connect */
-    sock_connect(&fd, "127.0.0.1", 1337);
+    sock_connect(&fd, ip, port);
 
     /* get prompt */
     bzero(buf, MAX_BUF);
