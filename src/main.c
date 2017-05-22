@@ -6,23 +6,28 @@
 #include "gpg.h"
 
 #define MAX_BUF (1024 * 8)
-
-/* constants */
-#define GPG_PRIV_KEY "test_priv.key"
-#define GPG_PUB_KEY "test_pub.key"
-
+#define GPG_PRIV_KEY "priv.key"
+#define GPG_PUB_KEY "pub.key"
 char *pattern = "-----END PGP MESSAGE-----";
 
 int main(int argc, char *argv[])
 {
-    int ret, fd;
+    int ret, port, fd;
     char buf[MAX_BUF];
+    char *ip, *srv_keypath, *cli_username;
     char *fpr, *cipher, *sign, *plain;
 
-    char *ip = "127.0.0.1";
-    int port = 1337;
-    char *srv_keypath = "../pub_key.asc";
-    char *cli_username = "../t";
+    /* check args */
+    if (argc < 5) {
+        log_errf("usage: %s <ip> <port> <srv.key> <username>", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    /* get args */
+    ip = strdup(argv[1]);
+    port = atoi(argv[2]);
+    srv_keypath = strdup(argv[3]);
+    cli_username = strdup(argv[4]);
 
     /* init */
     gpg_init(GPG_PRIV_KEY);
