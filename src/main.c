@@ -148,6 +148,12 @@ int main(int argc, char *argv[])
     log_infof("got: %s", buf);
 
     /* clean up */
+    free(sign);
+    free(plain);
+    free(flag_sign);
+    free(flag_base);
+    free(cipher);
+    free(cipher_json);
     gpg_free();
 
     return 0;
