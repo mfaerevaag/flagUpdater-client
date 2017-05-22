@@ -4,6 +4,7 @@
 #include "sock.h"
 #include "logger.h"
 #include "gpg.h"
+#include "base64.h"
 
 #define MAX_BUF (1024 * 8)
 #define GPG_PRIV_KEY "priv.key"
@@ -14,8 +15,8 @@ int main(int argc, char *argv[])
 {
     int ret, port, fd;
     char buf[MAX_BUF];
-    char *ip, *srv_keypath, *username, *newflag;
-    char *fpr, *cipher, *sign, *plain, *cipher_json;
+    char *ip, *srv_keypath, *username, *flag;
+    char *fpr, *cipher, *sign, *plain, *cipher_json, *flag_sign, *flag_base;
 
     /* check args */
     if (argc < 5) {
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
     port = atoi(argv[2]);
     srv_keypath = strdup(argv[3]);
     cli_username = strdup(argv[4]);
-    newflag = "SOMEFLAGBRUH";
+    flag = "SOMEFLAGBRUH";
 
     /* init */
     gpg_init(GPG_PRIV_KEY);
@@ -81,7 +82,6 @@ int main(int argc, char *argv[])
 
     /* sign */
     ret = gpg_sign(plain, strlen(plain), &sign);
-    /* log_infof("resigned:\n%s", sign); */
     if (ret < 0) {
         log_err("resign failed");
         return -1;
@@ -89,7 +89,6 @@ int main(int argc, char *argv[])
 
     /* encrypt */
     ret = gpg_encrypt(fpr, sign, strlen(sign), &cipher);
-    /* log_infof("reencrypted:\n%s", cipher); */
     if (ret < 0) {
         log_err("reencryption failed");
         return -1;
@@ -104,13 +103,31 @@ int main(int argc, char *argv[])
 
     log_infof("got auth result: %s", buf);
 
+    /* sign new flag */
+    bzero(buf, MAX_BUF);
+    sprintf(buf, "%s:%s", username, flag);
+    ret = gpg_sign(buf, strlen(buf), &flag_sign);
+    if (ret < 0) {
+        log_err("failed to sign flag");
+        return -1;
+    }
+
+    /* TODO: not encode null char? */
+    ret = base64_encode((unsigned char *) flag_sign, strlen(flag_sign), &flag_base);
+    if (ret < 0) {
+        log_err("failed to base64 encode flag signature");
+        return -1;
+    }
+
+    log_infof("flag signature:\n%s", flag_base);
+
     /* construct json */
     bzero(buf, MAX_BUF);
     sprintf(buf, "{"
-            "\"signer\": \"%s\","
-            "\"newflag\": \"%s\","
-            "\"signature\": \"%s:%s\""
-            "}\n", username, newflag, username, newflag);
+            "\"signer\": \"%s\", "
+            "\"newflag\": \"%s\", "
+            "\"signature\": \"%s\""
+            "}\n", username, flag, flag_base);
 
     /* encrypt json */
     ret = gpg_encrypt(fpr, buf, strlen(buf), &cipher_json);
