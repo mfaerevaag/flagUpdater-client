@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
     /* get prompt */
     bzero(buf, MAX_BUF);
-    sock_read(fd, buf, MAX_BUF);
+    sock_read(fd, buf, strlen("username: "));
     /* log_infof("got: %s", buf); */
 
     /* send username */
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    log_infof("flag signature:\n%s", flag_base);
+    /* log_infof("flag signature:\n%s", flag_base); */
 
     /* construct json */
     bzero(buf, MAX_BUF);
