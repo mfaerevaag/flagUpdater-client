@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     /* log_infof("got: %s", buf); */
 
     /* send username */
-    sprintf(buf, "%s\n", username);
+    snprintf(buf, MAX_BUF, "%s\n", username);
     sock_write(fd, buf, strlen(buf));
 
     /* read challenge */
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
 
     /* sign new flag */
     bzero(buf, MAX_BUF);
-    sprintf(buf, "%s:%s", username, flag);
+    snprintf(buf, MAX_BUF, "%s:%s", username, flag);
     ret = gpg_sign(buf, strlen(buf), &flag_sign);
     if (ret < 0) {
         log_err("failed to sign flag");
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
     /* construct json */
     bzero(buf, MAX_BUF);
-    sprintf(buf, "{"
+    snprintf(buf, MAX_BUF, "{"
             "\"signer\": \"%s\", "
             "\"newflag\": \"%s\", "
             "\"signature\": \"%s\""
