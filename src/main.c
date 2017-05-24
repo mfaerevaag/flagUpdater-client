@@ -44,7 +44,11 @@ int main(int argc, char *argv[])
     log_infof("server key %s", fpr);
 
     /* connect */
-    sock_connect(&fd, ip, port);
+    ret = sock_connect(&fd, ip, port);
+    if (ret < 0) {
+        log_err("failed to connect");
+        exit(EXIT_FAILURE);
+    }
 
     /* get prompt */
     bzero(buf, MAX_BUF);
